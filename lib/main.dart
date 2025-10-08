@@ -30,6 +30,40 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final TextEditingController weightController = TextEditingController();
   final TextEditingController heightController = TextEditingController();
+  String resultText = 'Enter your details';
+  double bmiResult = 0.0;
+
+  void calculateBMI()  {
+    final String weightText = weightController.text;
+    final String heightText = heightController.text;
+
+    if(weightText.isEmpty || heightText.isEmpty) {
+      setState(() {
+        resultText = 'Please enter both weight and height';
+      });
+      return;
+    }
+
+    final double weight = double.tryParse(weightText) ?? 0;
+    final double height = double.tryParse(heightText) ?? 0;
+
+    if (weight <= 0 || height <= 0) {
+      setState((){
+        resultText = 'please enter valid positive numbers';
+      });
+      return;
+    }
+     // Convert height from cm to meters
+     final double heightInMeters = height / 100;
+
+     // Calculate BMI: weight (kg) / (height (m) * height (m))
+     final double bmi = weight / (heightInMeters * heightInMeters);
+
+     setState((){
+      bmiResult = bmi;
+      resultText = 'Your BMI: ${bmi.toStringAsFixed(1)}';
+     });
+  }
 
 
   @override
@@ -74,16 +108,59 @@ class _HomePageState extends State<HomePage> {
             ),
             const SizedBox(height: 30),
 
-            // Calculate Button (placeholder for now)
+            // Calculate Button 
             ElevatedButton(
-              onPressed: () {
-                // We'll implement calculation in the next step
-              },
-              child: const Text('Calculate BMI'),
+              onPressed: calculateBMI,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+              ),
+              child: const Text(
+                'Calculate BMI',
+                style: TextStyle(fontSize: 18),
+              ),
+            ),
+            const SizedBox(height: 30),
+
+            //Result Display
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration:BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                resultText,
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue[800],
+                ),
+              ),
+            ),
+
+            //Formula Display
+            const SizedBox(height: 20),
+            const Text(
+              'BMI Formula: Weight (kg) / (height (m) * height (m))',
+              style: TextStyle(
+                fontSize: 14,
+                fontStyle: FontStyle.italic,
+                color: Colors.grey,
+              ),
+              textAlign: TextAlign.center,
             ),
           ],
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    weightController.dispose();
+    heightController.dispose();
+    super.dispose();
   }
 }
